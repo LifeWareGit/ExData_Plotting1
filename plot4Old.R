@@ -1,6 +1,6 @@
 # Check for required packages and install if necessary
 curPackages <- installed.packages()[,1]
-reqPackages <- c("data.table","dplyr","lubridate","sqldf")
+reqPackages <- c("data.table","dplyr","lubridate")
 for (pkg in reqPackages){
      if (!is.element(pkg,curPackages))
           install.packages(pkg)
@@ -10,14 +10,11 @@ for (pkg in reqPackages){
 library(data.table)
 library(dplyr)
 library(lubridate)
-library(sqldf)
 
-# Load a subset of the data and combine the Date and Time columns
-dataFile <- file("./household_power_consumption.txt")
-pwr_dt <- sqldf("select * from dataFile where Date in ('1/2/2007','2/2/2007')",
-                file.format = list(header = TRUE, sep = ";")) %>%
+# Load, filter, mutate (i.e. create "datetime" column), and subset the data
+pwr_dt <- fread("./household_power_consumption.txt",header=TRUE,sep=";",na.strings = "?") %>%
+     filter(Date=='1/2/2007' | Date=='2/2/2007') %>%
      mutate(datetime=dmy_hms(paste(Date,Time)))
-close(dataFile)
 
 #Plot 4 Code
 png(file="plot4.png",width=480,height=480)
